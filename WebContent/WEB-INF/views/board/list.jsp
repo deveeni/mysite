@@ -1,29 +1,27 @@
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>  
+
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+
 <!DOCTYPE html>
 <html>
 <head>
-<title>mysite</title>
+<title>beautyline</title>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
-<link href="/mysite/assets/css/board.css" rel="stylesheet" type="text/css">
+<link href="/beautyline/assets/css/board.css" rel="stylesheet" type="text/css">
 </head>
 <body>
 	<div id="container">
-		<div id="header">
-			<h1>MySite</h1>
-			<ul>
-				<li><a href="">로그인</a><li>
-				<li><a href="">회원가입</a><li>
-				<li><a href="">회원정보수정</a><li>
-				<li><a href="">로그아웃</a><li>
-				<li>님 안녕하세요 ^^;</li>
-			</ul>
-		</div>
+		<c:import url= "/WEB-INF/views/include/header.jsp"/>
+		
 		<div id="content">
 			<div id="board">
-				<form id="search_form" action="" method="post">
-					<input type="text" id="kwd" name="kwd" value="">
+				<form id="search_form" action="/beautyline/board" method="get">
+					<input type="text" id="keyword" name="keyword" value="${keyword }">
 					<input type="submit" value="찾기">
 				</form>
+			<!--  form id="board_list" action="/beautyline/board" method="post" -->
 				<table class="tbl-ex">
 					<tr>
 						<th>번호</th>
@@ -33,46 +31,62 @@
 						<th>작성일</th>
 						<th>&nbsp;</th>
 					</tr>				
+			<!-- c:set var="countList" value='${fn:length(list) }' / -->		
+			<c:set var="firstIndex" value="${totalCount - (currentPage - 1) * sizeList}" />
+			<c:forEach var='vo' items='${list }' varStatus='status'>
 					<tr>
-						<td>3</td>
-						<td><a href="">세 번째 글입니다.</a></td>
-						<td>안대혁</td>
-						<td>3</td>
-						<td>2015-10-11 12:04:20</td>
-						<td><a href="" class="del">삭제</a></td>
+						<td>[${ firstIndex - status.index }]</td>			
+						<td style="text-align:left;padding-left:${vo.depth*10 }px">
+							<c:if test='${vo.depth >= 1 }'>
+								<img src = "/beautyline/assets/images/reply.png" width="10">
+							</c:if>
+							<a href="/beautyline/board?a=view&no=${vo.no }&p=${currentPage }&keyword=${keyword }">${vo.title }</a></td>
+						<td>${vo.userName }</td>
+						<td>${vo.viewCount }</td>
+						<td>${vo.regDate } </td>
+						<td>
+						<c:if test='${vo.userNo == authUser.no }'>
+							<a href="/beautyline/board?a=deleteForm&no=${vo.no}&p=${currentPage } " class="del">삭제</a>
+						</c:if>
+						</td>
 					</tr>
-					<tr>
-						<td>2</td>
-						<td><a href="">두 번째 글입니다.</a></td>
-						<td>안대혁</td>
-						<td>3</td>
-						<td>2015-10-02 12:04:12</td>
-						<td><a href="" class="del">삭제</a></td>
-					</tr>
-					<tr>
-						<td>1</td>
-						<td><a href="">첫 번째 글입니다.</a></td>
-						<td>안대혁</td>
-						<td>3</td>
-						<td>2015-09-25 07:24:32</td>
-						<td><a href="" class="del">삭제</a></td>
-					</tr>
+					</c:forEach>
 				</table>
+			
+					<!-- begin:paging -->
+				<div class="pager">
+					<ul>
+						<c:if test="${prevPage > 0 }">
+							<li><a href="/beautyline/board?a=list&p=${prevPage }&keyword=${keyword}">◀</a></li>
+						</c:if>
+						<c:forEach begin='${firstPage }' end='${lastPage }' step='1' var='i'>
+							<c:choose>
+								<c:when test='${currentPage == i }'>
+									<li class="selected">${i }</li>
+								</c:when>
+								<c:when test='${i > pageCount }'>
+									<li>${i }</li>
+								</c:when>
+								<c:otherwise>
+									<li><a href="/beautyline/board?a=list&p=${i }&keyword=${keyword}">${i }</a></li>	
+								</c:otherwise>
+							</c:choose>
+						</c:forEach>
+						<c:if test="${nextPage > 0 }">
+							<li><a href="/beautyline/board?a=list&p=${nextPage }&keyword=${keyword}">▶</a></li>
+						</c:if>
+					</ul>
+				</div>
+				<!-- end:paging -->
 				<div class="bottom">
-					<a href="" id="new-book">글쓰기</a>
+					<c:if test='${authUser != null }'>
+					<a href="/beautyline/board?a=writeForm" id="new-book">글쓰기</a>
+					</c:if>
 				</div>				
 			</div>
 		</div>
-		<div id="navigation">
-			<ul>
-				<li><a href="">안대혁</a></li>
-				<li><a href="">방명록</a></li>
-				<li><a href="">게시판</a></li>
-			</ul>
-		</div>
-		<div id="footer">
-			<p>(c)opyright 2014 </p>
-		</div>
+		<c:import url= "/WEB-INF/views/include/navi.jsp"/>
+		<c:import url= "/WEB-INF/views/include/footer.jsp"/>
 	</div>
 </body>
 </html>
